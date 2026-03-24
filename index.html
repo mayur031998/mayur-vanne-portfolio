@@ -1,0 +1,1781 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<style>
+/* Keep navbar fixed and scrollable with proper spacing */
+.header {
+  position: fixed;
+  overflow-y: auto;
+  max-height: 100vh;
+  height: auto !important;
+  min-height: 100vh;
+  padding-top: 30px !important; /* Reduced from 60px */
+  padding-bottom: 20px !important;
+}
+
+.header-container {
+  overflow-y: auto;
+  max-height: none !important;
+  height: auto !important;
+  padding-top: 0 !important;
+}
+
+.navmenu {
+  overflow-y: auto;
+  max-height: none !important;
+  height: auto !important;
+  margin-top: 0 !important;
+  padding-top: 10px; /* Reduced from 20px */
+  
+}
+.navmenu a, .navmenu a:focus {
+  padding: 14px 10px 13px 10px !important;
+}
+
+.navmenu ul {
+  padding-top: 0 !important;
+}
+
+/* Custom styled scrollbar for navbar - matches dark theme */
+.header::-webkit-scrollbar,
+.header-container::-webkit-scrollbar,
+.navmenu::-webkit-scrollbar {
+  width: 6px;
+  display: none;
+}
+
+.header::-webkit-scrollbar-track,
+.header-container::-webkit-scrollbar-track,
+.navmenu::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+
+.header::-webkit-scrollbar-thumb,
+.header-container::-webkit-scrollbar-thumb,
+.navmenu::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  transition: background 0.3s ease;
+}
+
+.header::-webkit-scrollbar-thumb:hover,
+.header-container::-webkit-scrollbar-thumb:hover,
+.navmenu::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+/* For Firefox */
+.header,
+.header-container,
+.navmenu {
+  scrollbar-width: none;
+  scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
+}
+
+/* Show scrollbar ONLY when hovering over navbar area */
+.header:hover::-webkit-scrollbar,
+.header-container:hover::-webkit-scrollbar,
+.navmenu:hover::-webkit-scrollbar {
+  display: block;
+}
+
+.header:hover,
+.header-container:hover,
+.navmenu:hover {
+  scrollbar-width: thin;
+}
+
+/* Weather toggles on one line */
+.navmenu .weather-toggles {
+  display: flex !important;
+  gap: 5px;
+  padding: 0 !important;
+}
+
+.navmenu .weather-toggles a {
+  flex: 1;
+  text-align: center;
+}
+
+/* Space for social links below navbar */
+.social-links {
+  margin-top: 30px;
+  margin-bottom: 30px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* AI GAME MODAL STYLES (MATCHING UI)  */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85); /* Darker overlay for better focus */
+  display: none;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px); /* Blurs original index background */
+  z-index: 10001; /* Above everything including snow */
+  padding: 20px;
+}
+
+.modal-overlay.active { display: flex; }
+
+.modal-game-content {
+  background: linear-gradient(135deg, var(--surface-color) 0%, color-mix(in srgb, var(--surface-color), var(--accent-color) 5%) 100%); /* Matches dark-background palette */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  width: 100%;
+  max-width: 500px;
+  padding: 2rem;
+  border-radius: 20px;
+  position: relative;
+  text-align: center;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+.difficulty-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 1.5rem;
+}
+
+.diff-btn {
+      background-color: transparent;
+    color: var(--accent-color);
+    border-color: #ececec !important;
+  padding: 8px 16px;
+  border-radius: 30px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: 0.3s;
+  
+}
+
+.diff-btn.active {
+background-color: var(--accent-color);
+    color: var(--contrast-color);
+    border-color: var(--accent-color);
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 1.5rem;
+}
+
+.stat-card {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 10px;
+  border-radius: 12px;
+}
+
+.stat-val { font-size: 1.5rem; font-weight: 700; color: #fff; display: block; }
+.stat-label { font-size: 0.65rem; text-transform: uppercase; color: #888; }
+
+.ai-log {
+  font-family: 'Courier New', monospace;
+  font-size: 0.8rem;
+  color: #4ade80;
+  height: 20px;
+  margin-bottom: 10px;
+}
+
+.choices {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin: 20px 0;
+}
+
+.choice-btn {
+  width: 75px;
+  height: 75px;
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 2.2rem;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.choice-btn:hover:not(:disabled) {
+  background: #0563bb;
+  transform: translateY(-3px);
+}
+
+.choice-btn:disabled { opacity: 0.2; cursor: not-allowed; }
+
+#result-banner { font-size: 1.2rem; font-weight: 600; min-height: 30px; margin-bottom: 10px; color: #fff; }
+
+.footer-btns {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.btn-small { 
+  padding: 8px 16px; 
+  border-radius: 8px; 
+  font-size: 0.8rem; 
+  border: none;
+  cursor: pointer;
+}
+.btn-start {  background-color: var(--accent-color);
+    color: var(--contrast-color);
+    border-color: var(--accent-color); }
+.btn-reset {background-color: var(--accent-color);
+    color: var(--contrast-color);
+    border-color: var(--accent-color); }
+
+/* Hero Profile Card - Exact match with About section */
+.hero .profile-card {
+  background: linear-gradient(135deg, var(--surface-color) 0%, color-mix(in srgb, var(--surface-color), var(--accent-color) 5%) 100%);
+  border-radius: 2rem;
+  padding: 1.5rem !important;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+  border: 1px solid color-mix(in srgb, var(--accent-color), transparent 90%);
+  position: relative;
+  overflow: hidden;
+  max-width: 400px !important;
+  margin: 0 auto;
+}
+
+.hero .profile-card::before {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--accent-color), color-mix(in srgb, var(--accent-color), var(--heading-color) 30%));
+}
+
+.hero .profile-header {
+  position: relative;
+  margin-bottom: 2rem;
+}
+
+.hero .profile-header .profile-image {
+  width: 160px;
+  height: 170px;
+  margin: 0 auto 1.5rem;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 4px solid var(--accent-color);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.hero .profile-header .profile-image img {
+  width: 100%;
+  /* height: 100%; */
+  object-fit: cover;
+}
+
+.hero .profile-header .profile-badge {
+  position: absolute;
+  bottom: 20px;
+  right: calc(50% - 65px);
+  width: 32px;
+  height: 32px;
+  background-color: var(--accent-color);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid var(--surface-color);
+}
+
+.hero .profile-header .profile-badge i {
+  color: var(--contrast-color);
+  font-size: 14px;
+}
+
+.hero .profile-content h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: var(--heading-color);
+}
+
+.hero .profile-content .profession {
+  color: var(--accent-color);
+  font-weight: 500;
+  margin-bottom: 2rem;
+}
+
+.hero .contact-links {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.hero .contact-links .contact-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background-color: color-mix(in srgb, var(--surface-color), var(--background-color) 50%);
+  border-radius: 0.75rem;
+  text-decoration: none;
+  color: var(--default-color);
+  transition: all 0.3s;
+  border: 1px solid color-mix(in srgb, var(--default-color), transparent 90%);
+}
+
+.hero .contact-links .contact-item:hover {
+  background-color: var(--accent-color);
+  color: var(--contrast-color);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px color-mix(in srgb, var(--accent-color), transparent 70%);
+}
+
+.hero .contact-links .contact-item i {
+  font-size: 1rem;
+  width: 18px;
+}
+
+@media (max-width: 991px) {
+  .hero .profile-card {
+    margin-top: 3rem;
+  }
+}
+</style>
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Mayur Anil Vanne</title>
+  <meta name="description" content="PMP-certified technical professional with cross-functional experience in project management, product operations, and data-driven decision making, seeking Summer 2026 management-focused internships.">
+  <meta name="keywords" content="">
+
+  <!-- Favicons -->
+  <link href="assets/img/profile/pvlogo.jpg" rel="icon">
+  <link href="assets/img/profile/pvlogo.jpg" rel="apple-touch-icon">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&family=Nunito:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/vendor/aos/aos.css" rel="stylesheet">
+  <link href="assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
+  <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
+
+  <!-- Main CSS File -->
+  <link href="assets/css/main.css" rel="stylesheet">
+
+  <!-- Leaflet Map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+</head>
+
+<body class="index-page">
+<!-- Snow Canvas Layer -->
+<canvas id="snowCanvas" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9998;"></canvas>
+
+<!-- Rain Canvas Layer -->
+<canvas id="rainCanvas" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9997;"></canvas>
+
+<!-- Lightning Flash Layer -->
+<div id="lightningFlash" style="position: fixed; top:0; left:0; width:100%; height:100%; background:white; opacity:0; pointer-events:none; z-index:9999;"></div>
+
+<!-- Lightning Button -->
+<button id="lightningBtn" class="lightningBtn1" onclick="triggerLightning()" 
+style="">
+
+⚡
+</button>
+
+
+   <header id="header" class="header dark-background d-flex flex-column justify-content-center">
+    <i class="header-toggle d-xl-none bi bi-list"></i>
+
+    <div class="header-container d-flex flex-column align-items-start">
+      <nav id="navmenu" class="navmenu">
+      <ul>
+          <li><a href="#hero" class="active"><i class="bi bi-house navicon"></i>Home</a></li>
+          <li><a href="#about"><i class="bi bi-person navicon"></i> About</a></li>
+          <li><a href="#resume"><i class="bi bi-file-earmark-text navicon"></i> Resume</a></li>
+          <li><a href="#portfolio"><i class="bi bi-images navicon"></i> Portfolio</a></li>
+          <li><a href="#contact"><i class="bi bi-envelope navicon"></i> Contact</a></li>
+          <li class="weather-toggles">
+            <a href="javascript:void(0);" onclick="toggleSnow()"><i class="bi bi-snow navicon"></i> Snow</a>
+            <a href="javascript:void(0);" onclick="toggleRain()"><i class="bi bi-cloud-rain navicon"></i> Rain</a>
+          </li>
+          <li><a style="cursor: pointer;" class="btn-main" onclick="openGameModal()">Play > AI: Rock Paper Scissors</a></li>
+        </ul>
+      </nav>
+      <div class="social-links text-center">
+          <a href="https://github.com/mayur031998" target="_blank" rel="noopener noreferrer" class="github"><i class="bi bi-github"></i></a>
+          <a href="https://www.linkedin.com/in/mayur-vanne" target="_blank" rel="noopener noreferrer" class="linkedin"><i class="bi bi-linkedin"></i></a>
+          <a href="https://app.joinhandshake.com/profiles/mayur31998" target="_blank" rel="noopener noreferrer" class="handshake-link"><img src="assets/img/handshake-logo.jpeg" alt="Handshake" class="handshake-icon-small"></a>
+      </div>
+    </div>
+
+  </header>
+
+  <main class="main">
+
+<!-- Hero Section -->
+    <section id="hero" class="hero section">
+
+      <div class="background-elements">
+        <div class="bg-circle circle-1"></div>
+        <div class="bg-circle circle-2"></div>
+      </div>
+
+      <div class="hero-content">
+
+        <div class="container">
+          <div class="row align-items-center">
+
+            <div class="col-lg-6" data-aos="fade-right" data-aos-delay="100">
+              <div class="hero-text">
+                <h1>Mayur<span class="accent-text">Vanne</span></h1>
+                <h2>PMP | Technical & Product</h2>
+                <p class="lead">Focused on <span class="typed" data-typed-items="Technical Project Management, Product & Operations Leadership, Data-Driven Decision Making, Financial & Market Analysis, Cross-Functional Delivery"></span></p>
+                <p class="description">PMP-certified professional leading technical initiatives across engineering, business and operations, driving 90%+ on-time delivery and 25% faster execution. Actively seeking Summer 2026 internships to leverage technical, product and project experience.</p>
+
+                <div class="hero-actions">
+                  <a href="#portfolio" class="btn btn-primary">View My Work</a>
+                  <a href="#resume" class="btn btn-outline">Profile</a>
+                  <div class="resume-dropdown">
+                    <button class="btn btn-outline resume-dropdown-toggle">
+                      Resumes <i class="bi bi-chevron-down ms-1"></i>
+                    </button>
+                    <div class="resume-dropdown-menu">
+
+                      <a href="assets/files/Mayur Anil Vanne Technical Resume.pdf" target="_blank" rel="noopener noreferrer" class="resume-dropdown-item">
+                        <i class="bi bi-file-earmark-text me-2"></i>Technical Resume
+                      </a>
+
+                      <div class="resume-dropdown-divider"></div>
+
+                      <a href="assets/files/Mayur Anil Vanne Management Resume.pdf" target="_blank" rel="noopener noreferrer" class="resume-dropdown-item">
+                        <i class="bi bi-file-earmark-text me-2"></i>Management Resume
+                      </a>
+
+                    </div>
+                  </div>
+                </div>
+
+                <div class="social-links">
+                  <a href="https://github.com/mayur031998" target="_blank" rel="noopener noreferrer"><i class="bi bi-github"></i></a>
+                  <a href="https://www.linkedin.com/in/mayur-vanne" target="_blank" rel="noopener noreferrer"><i class="bi bi-linkedin"></i></a>
+                  <a href="https://app.joinhandshake.com/profiles/mayur31998" target="_blank" rel="noopener noreferrer" class="handshake-link"><img src="assets/img/handshake-logo.jpeg" alt="Handshake" class="handshake-icon"></a>
+                </div>
+              </div>
+            </div>
+
+            <!-- REPLACED: Profile Card from About Section -->
+            <div class="col-lg-6" data-aos="fade-left" data-aos-delay="200">
+              <div class="profile-card">
+                <div class="profile-header">
+                  <div class="profile-image">
+                    <img src="assets/img/profile/mayur-profile.png" alt="Profile Image" class="img-fluid">
+                  </div>
+                  <div class="profile-badge">
+                    <i class="bi bi-check-circle-fill"></i>
+                  </div>
+                </div>
+
+                <div class="profile-content">
+                  <h3>Mayur Anil Vanne</h3>
+                  <p class="profession">PMP-Certified Technical & Product Professional</p>
+
+                  <div class="contact-links">
+                    <a href="mailto:mayurvanne@outlook.com" class="contact-item">
+                      <i class="bi bi-envelope"></i>
+                      mayurvanne@outlook.com
+                    </a>
+                    <a href="tel:+19293707587" class="contact-item">
+                      <i class="bi bi-telephone"></i>
+                      +1 (929) 370-7587
+                    </a>
+                    <a href="#" class="contact-item">
+                      <i class="bi bi-geo-alt"></i>
+                      New York, NY
+                    </a>
+
+                    <a href="https://www.linkedin.com/in/mayur-vanne" class="contact-item" target="_blank" rel="noopener noreferrer">
+                      <i class="bi bi-linkedin"></i>
+                      linkedin.com/in/mayur-vanne
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </section><!-- /Hero Section -->
+
+    <!-- About Section -->
+    <section id="about" class="about section">
+
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+        <div class="row">
+      
+          <div class="col-lg-12" data-aos="fade-left" data-aos-delay="300">
+            <div class="about-content">
+              <div class="section-header">
+                <span class="badge-text">Get to Know Me</span>
+                <h2>Driving Technical Projects, Product Strategy & Data-Driven Impact</h2>
+              </div>
+
+              <div class="description">
+                <p>PMP-certified professional with experience leading technical projects, product operations and cross-functional collaboration across engineering, business and finance teams. I specialize in translating complex requirements into executable roadmaps and ensuring high-quality delivery aligned with auditing and compliance standards.</p>
+
+                <p>Currently pursuing an MS in Management of Technology at New York University's Tandon School of Engineering, with coursework spanning operations management, financial analysis for tech managers, and economics & strategy. I leverage a blend of technical, analytical and managerial skills to drive faster execution, optimize processes and enable informed, strategic decision making.</p>
+              </div>
+
+              <div class="stats-grid">
+                <div class="stat-item">
+                  <div class="stat-number">90%+</div>
+                  <div class="stat-label">On-Time Project Delivery</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-number">25%</div>
+                  <div class="stat-label">Faster Execution Achieved</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-number">8</div>
+                  <div class="stat-label">Products Launched</div>
+                </div>
+              </div>
+
+              <div class="details-grid">
+                <div class="detail-row">
+                  <div class="detail-item">
+                    <span class="detail-label">Specialization</span>
+                    <span class="detail-value">Technical Project Management, Product & Operations, Data & AI</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">Experience Level</span>
+                    <span class="detail-value">PMP-Certified Professional</span>
+                  </div>
+                </div>
+                <div class="detail-row">
+                  <div class="detail-item">
+                    <span class="detail-label">Education</span>
+                    <span class="detail-value">MS, Management of Technology, NYU Tandon</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">Languages</span>
+                    <span class="detail-value">English, Marathi, Hindi</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </section><!-- /About Section -->
+
+    <!-- Skills Section -->
+    <section id="skills" class="skills section">
+
+      <!-- Section Title -->
+      <div class="container section-title" data-aos="fade-up">
+        <h2>Skills</h2>
+        <p>PMP-certified technical professional combining project/program management, product operations and data-driven analysis to deliver efficient, high-impact outcomes.</p>
+      </div><!-- End Section Title -->
+
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+        <div class="row">
+          <div class="col-lg-6">
+            <div class="skills-category" data-aos="fade-up" data-aos-delay="200">
+              <h3>Technical & Product Skills</h3>
+              <div class="skills-animation">
+                <div class="skill-item">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <h4>Python, Java, JavaScript, HTML, CSS</h4>
+                    <span class="skill-percentage">85%</span>
+                  </div>
+                  <div class="progress">
+                    <div class="progress-bar" role="progressbar" aria-valuenow="95" aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                  <div class="skill-tooltip">Expert level knowledge of semantic HTML5 and modern CSS3 techniques</div>
+                </div>
+
+                <div class="skill-item">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <h4>Project & Program Management (Agile, Scrum, Kanban)</h4>
+                    <span class="skill-percentage">90%</span>
+                  </div>
+                  <div class="progress">
+                    <div class="progress-bar" role="progressbar" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                  <div class="skill-tooltip">Strong proficiency in ES6+, DOM manipulation, and modern frameworks</div>
+                </div>
+
+                <div class="skill-item">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <h4>Product Management & Operations</h4>
+                    <span class="skill-percentage">85%</span>
+                  </div>
+                  <div class="progress">
+                    <div class="progress-bar" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                  <div class="skill-tooltip">Experience with React hooks, state management, and component architecture</div>
+                </div>
+              </div>
+            </div><!-- End Frontend Skills -->
+          </div>
+
+          <div class="col-lg-6">
+            <div class="skills-category" data-aos="fade-up" data-aos-delay="300">
+              <h3>Data, Tools & Platforms</h3>
+              <div class="skills-animation">
+                <div class="skill-item">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <h4>Data Analysis: Statistics, Power BI, Tableau</h4>
+                    <span class="skill-percentage">80%</span>
+                  </div>
+                  <div class="progress">
+                    <div class="progress-bar" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                  <div class="skill-tooltip">Server-side JavaScript development with Express and REST APIs</div>
+                </div>
+
+                <div class="skill-item">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <h4>Databases: SQL, Microsoft Excel, Oracle</h4>
+                    <span class="skill-percentage">80%</span>
+                  </div>
+                  <div class="progress">
+                    <div class="progress-bar" role="progressbar" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                  <div class="skill-tooltip">Python development with Django and data analysis tools</div>
+                </div>
+
+                <div class="skill-item">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <h4>Tools: Jira, Git, MS Word, PowerPoint</h4>
+                    <span class="skill-percentage">85%</span>
+                  </div>
+                  <div class="progress">
+                    <div class="progress-bar" role="progressbar" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                  <div class="skill-tooltip">Database design, optimization, and complex queries</div>
+                </div>
+              </div>
+            </div><!-- End Backend Skills -->
+          </div>
+        </div>
+
+      </div>
+
+    </section><!-- /Skills Section -->
+
+    <!-- Resume Section -->
+    <section id="resume" class="resume section">
+
+      <!-- Section Title -->
+      <div class="container section-title" data-aos="fade-up">
+        <h2>Professional Summary</h2>
+        <p>PMP-certified professional leading technical projects and cross-functional initiatives, achieving 90%+ on-time delivery and 25% faster execution, seeking management-focused Summer 2026 internships leveraging technical, product and project experience.</p>
+      </div><!-- End Section Title -->
+
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+        <div class="row gy-4">
+          <!-- Left column with summary and contact -->
+          <div class="col-lg-4">
+            <div class="resume-side" data-aos="fade-right" data-aos-delay="100">
+              <div class="profile-img mb-4">
+                <img src="assets/img/profile/mayur-profile.png" alt="Profile" class="img-fluid rounded">
+              </div>
+
+              <div class="resume-dropdown resume-dropdown-sidebar mb-4">
+                <button class="btn btn-outline resume-dropdown-toggle w-100">
+                  Resumes <i class="bi bi-chevron-down ms-1"></i>
+                </button>
+                <div class="resume-dropdown-menu">
+                  <a href="assets/files/Mayur Anil Vanne Technical Resume.pdf" target="_blank" rel="noopener noreferrer" class="resume-dropdown-item">
+                    <i class="bi bi-file-earmark-text me-2"></i>Technical Resume
+                  </a>
+                  <div class="resume-dropdown-divider"></div>
+                  <a href="assets/files/Mayur Anil Vanne Management Resume.pdf" target="_blank" rel="noopener noreferrer" class="resume-dropdown-item">
+                    <i class="bi bi-file-earmark-text me-2"></i>Management Resume
+                  </a>
+                </div>
+              </div>
+
+              <h3>About Me</h3>
+              <p>PMP-certified professional with experience leading technical projects, product launches and operations across technology and business environments. Proven track record in translating client requirements into detailed user stories and technical tasks, coordinating cross-functional teams, and driving faster, compliant project delivery.</p>
+
+              <h3 class="mt-4">Contact Information</h3>
+              <ul class="contact-info list-unstyled">
+                <li><h6><i class="bi bi-geo-alt"></i>Location</h6>  New York, NY</li>
+                <li><h6><i class="bi bi-envelope"></i>Email</h6>  <a href="mailto:mayurvanne@outlook.com" target="_blank" rel="noopener noreferrer">mayurvanne@outlook.com</a></li>
+                <li><h6><i class="bi bi-telephone"></i>Phone</h6>  <a href="tel:+19293707587">+1 (929) 370-7587</a></li>
+                <li><h6><i class="bi bi-link-45deg"></i>LinkedIn</h6> <a href="https://www.linkedin.com/in/mayur-vanne" target="_blank" rel="noopener noreferrer">linkedin.com/in/mayur-vanne</a></li>
+              </ul>
+
+              <div class="skills-animation mt-4">
+                <h3>Technical Skills</h3>
+                <div class="skill-item">
+                  <div class="d-flex justify-content-between">
+                    <span>Programming: Python, Java, JavaScript, HTML, CSS</span>
+                    <span>85%</span>
+                  </div>
+                  <div class="progress">
+                    <div class="progress-bar" role="progressbar" aria-valuenow="95" aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                </div>
+
+                <div class="skill-item">
+                  <div class="d-flex justify-content-between">
+                    <span>Data Analysis: Statistics, Power BI, Tableau</span>
+                    <span>80%</span>
+                  </div>
+                  <div class="progress">
+                    <div class="progress-bar" role="progressbar" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                </div>
+
+                <div class="skill-item">
+                  <div class="d-flex justify-content-between">
+                    <span>Databases: SQL, Excel, Oracle</span>
+                    <span>80%</span>
+                  </div>
+                  <div class="progress">
+                    <div class="progress-bar" role="progressbar" aria-valuenow="90" aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                </div>
+
+                <div class="skill-item">
+                  <div class="d-flex justify-content-between">
+                    <span>Tools: Jira, Git, MS Word, PowerPoint</span>
+                    <span>85%</span>
+                  </div>
+                  <div class="progress">
+                    <div class="progress-bar" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right column with experience and education -->
+          <div class="col-lg-8 ps-4 ps-lg-5">
+            <!-- Experience Section -->
+            <div class="resume-section" data-aos="fade-up">
+              <h3><i class="bi bi-briefcase me-2"></i>Professional Experience</h3>
+
+              <div class="resume-item">
+                <h4>Technical Business Analyst</h4>
+                <h5>January 2024 – August 2025</h5>
+                <p class="company"><i class="bi bi-building"></i> GOLDEN PETALS TECHNOLOGIES, Pune, India</p>
+                <ul>
+                  <li>Collaborated with a team of 7 members to streamline daily tasks and optimize timelines, ensuring compliance with auditing standards and achieving 25% faster delivery of high-quality technical solutions through performance analysis.</li>
+                  <li>Translated client requirements for 3+ clients into user stories and detailed technical tasks through business analysis and client services collaboration, driving software and design decisions using data modeling and API integration.</li>
+                  <li>Facilitated Agile sprint planning, KPI reporting, payments and web services deployment, resulting in a 20% improvement in on-time task completion and project performance metrics across daily and weekly development cycles.</li>
+                  <li>Coordinated with cross-functional teams across engineering, business and finance departments, supporting code review, tech stack decisions and testing to meet client expectations and deliver 90%+ project milestones within scope.</li>
+                </ul>
+              </div>
+
+              <div class="resume-item">
+                <h4>Founder / Product Management &amp; Operations Lead</h4>
+                <h5>January 2021 – December 2023</h5>
+                <p class="company"><i class="bi bi-building"></i> PURE HILL ORGANICS, Panchgani, India</p>
+                <ul>
+                  <li>Led market research, competitive analysis, market sizing and gap identification in the skincare industry to define product strategies and launch 8 skincare products, resulting in a 15% increase in market share in targeted demographics.</li>
+                  <li>Executed sales, business development and distribution strategies using GTM planning, survey design, product marketing and product analytics for Amazon and other ecommerce platforms, driving a 40% increase in customer engagement and positive ROI with break-even within 7 months.</li>
+                  <li>Analyzed UX research initiatives and behavioral data, applying operations research to enhance product development, design and feature roadmaps, achieving an 18% improvement in customer retention rates.</li>
+                  <li>Optimized e-commerce operations through vendor management, logistics, inventory management and supply chain optimization, enabling efficient capital allocation and asset management to successfully penetrate 3 new markets.</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Education Section -->
+            <div class="resume-section" data-aos="fade-up" data-aos-delay="100">
+              <h3><i class="bi bi-mortarboard me-2"></i>Education</h3>
+
+              <div class="resume-item">
+                <h4>Master of Science, Management of Technology</h4>
+                <h5>September 2025 - May 2027</h5>
+                <p class="company"><i class="bi bi-building"></i> New York University, Tandon School of Engineering</p>
+                <p>CGPA: 3.55. Relevant Coursework: Operations Management, Financial Analysis for Tech Managers, Economics &amp; Strategy.</p>
+              </div>
+
+              <div class="resume-item">
+                <h4>Bachelor of Technology, Electronics &amp; Telecommunication</h4>
+                <h5>July 2016 - May 2020</h5>
+                <p class="company"><i class="bi bi-building"></i> Dr. Babasaheb Ambedkar Technological University</p>
+                <p>Focused on core electronics, telecommunications and applied engineering fundamentals.</p>
+              </div>
+            </div>
+
+            <!-- Data Science & AI Projects Section -->
+            <div class="resume-section" data-aos="fade-up" data-aos-delay="150">
+              <h3><i class="bi bi-graph-up-arrow me-2"></i>Data Science &amp; AI Projects</h3>
+
+              <div class="resume-item">
+                <h4>Financial Market &amp; Economic Forecasting Project</h4>
+                <h5>NYU, Tandon School of Engineering</h5>
+                <p class="company"><i class="bi bi-bar-chart"></i> Time-Series &amp; Economic Modeling</p>
+                <ul>
+                  <li>Constructed predictive time-series models processing 100,000+ data points using Python-based machine learning algorithms, regression techniques and advanced statistical analysis on 25 years of financial market data.</li>
+                  <li>Derived key economic relationships between unemployment and economic expansion by executing exploratory data analysis, statistical testing, correlation analysis and data visualization on macroeconomic indicators using NumPy and Pandas.</li>
+                  <li>Led a cross-functional team of 6 to deliver an interactive forecasting dashboard with actionable economic insights, predictive analysis and strategic investment implications, improving decision precision and impact.</li>
+                </ul>
+              </div>
+
+              <div class="resume-item">
+                <h4>LLM-Powered Job Market Forecasting System</h4>
+                <h5>PhD Supervised Research</h5>
+                <p class="company"><i class="bi bi-cpu"></i> Multi-Modal Forecasting &amp; Sentiment Analysis</p>
+                <ul>
+                  <li>Developing a quarter-ahead job market forecasting model integrating 31 economic indicators with 100,000+ social media posts using LLM-based sentiment analysis and time-series forecasting over 500,000+ historical data points.</li>
+                  <li>Designing a sentiment extraction pipeline processing 10,000+ social posts to identify early-warning signals 2–3 months before official employment data through language models and topic modeling across 50+ industry-specific channels.</li>
+                  <li>Building a multi-modal prediction framework that correlates social discourse patterns with hiring trends to distinguish booming vs. declining sectors by fusing structured economic datasets with unstructured text signals.</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Certifications Section -->
+            <div class="resume-section" data-aos="fade-up" data-aos-delay="100">
+              <h3><i class="bi bi-mortarboard me-2"></i>Certifications</h3>
+
+              <div class="resume-item">
+                <h4>Project Management Professional (PMP)</h4>
+                <p class="company"><i class="bi bi-kanban"></i> Agile, Scrum, Kanban</p>
+                <p class="company"><i class="bi bi-patch-check-fill"></i> by PMI</p>
+              </div>
+
+              <div class="resume-item">
+                <h4>AI/ML Skills</h4>
+                <p class="company"><i class="bi bi-code-slash"></i> NumPy, Pandas, TensorFlow, Scikit-learn</p>
+              </div>
+
+              <div class="resume-item">
+                <h4>Strategic Technology Management</h4>
+                <p class="company"><i class="bi bi-mortarboard"></i> University of Illinois Urbana-Champaign (UIUC)</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </section><!-- /Resume Section -->
+
+    <!-- Portfolio Section -->
+    <section id="portfolio" class="portfolio section">
+
+      <!-- Section Title -->
+      <div class="container section-title" data-aos="fade-up">
+        <h2>What I've Built</h2>
+      </div><!-- End Section Title -->
+
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+        <div class="isotope-layout" data-default-filter="*" data-layout="masonry" data-sort="original-order">
+
+          <div class="row">
+            <div class="col-lg-4 filter-sidebar">
+              <div class="filters-wrapper" data-aos="fade-right" data-aos-delay="150">
+                <ul class="portfolio-filters isotope-filters">
+                  <li data-filter="*" class="filter-active">All Projects</li>
+                  <li data-filter=".filter-ai">AI &amp; Data Science</li>
+                  <li data-filter=".filter-product">Product Ventures</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="col-lg-8">
+              <!-- Mobile-only filter buttons (hidden on desktop, which uses the sidebar) -->
+              <div class="mobile-filter-btns" id="mobileFilterBtns">
+                <button class="mob-filter-btn" data-filter=".filter-ai" id="mobBtnAi">AI &amp; Data Science</button>
+                <button class="mob-filter-btn" data-filter=".filter-product" id="mobBtnProduct">Product Ventures</button>
+              </div>
+
+              <div id="purehill-desc" style="display:none; margin-bottom: 20px; padding: 0 20px; border-left: 3px solid #3DBFBF; color: var(--default-color); font-size: 1rem; line-height: 1.6; font-family: var(--default-font);">
+                A reflection of building Pure Hill Organics - blending product strategy, product analytics, operations, and data driven execution into a scalable and trusted brand.
+              </div>
+              <div id="ai-desc" style="display:none; margin-bottom: 20px; padding: 0 20px; border-left: 3px solid #1B3880; color: var(--default-color); font-size: 1rem; line-height: 1.6; font-family: var(--default-font);">
+                Built a Smart Personal Planner that uses multi-agent AI and LLMs to prioritize tasks, offer smart suggestions, and deliver context-aware insights, creating a scalable platform that enhances productivity and task efficiency.
+              </div>
+              <div class="row gy-4 portfolio-container isotope-container" data-aos="fade-up" data-aos-delay="200">
+
+                <div class="col-lg-4 col-md-6 portfolio-item isotope-item filter-ai ai-card-container">
+                  <div class="portfolio-wrap">
+                    <img src="assets/img/portfolio/smart-ai-planner.png" class="img-fluid" alt="Smart AI Planner" loading="lazy" style="object-fit: cover; object-position: center; transform: scale(1.35); background-color: #1B3880;">
+                    <div class="portfolio-info ai-hover-overlay">
+                      <div class="content">
+                        <a href="https://github.com/Great-Agentic-AI-Lab/Smart_AI_Planner" target="_blank" rel="noopener noreferrer" class="goto-project-link" data-tooltip="Click to View on Github">
+                          Go To Project
+                        </a>
+                      </div>
+                    </div>
+                    <!-- Mobile/tablet only info button -->
+                    <button class="info-btn ai-info-btn-mobile" aria-label="More info"><i class="bi bi-info-lg"></i></button>
+                    <div class="info-popup ai-info-popup-mobile">
+                      <p>An AI powered personal planner built on a multi agent architecture where 4 specialized agents handle task prioritization, smart suggestions, notifications and behavioral analytics, integrated with a vector database for context aware recommendations and a natural language bot for seamless task management.</p>
+                    </div>
+                  </div>
+                  <!-- Mobile/tablet: visible GitHub CTA (no hover on touch) -->
+                  <a href="https://github.com/Great-Agentic-AI-Lab/Smart_AI_Planner" target="_blank" rel="noopener noreferrer" class="ai-mobile-github-cta">
+                    <i class="bi bi-github"></i>
+                    <span>Open project on GitHub</span>
+                    <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i>
+                  </a>
+                  <div class="ai-hover-popup">
+                    <div class="ai-hover-popup-title">Smart AI Planner</div>
+                    <p>An AI powered personal planner built on a multi agent architecture where 4 specialized agents handle task prioritization, smart suggestions, notifications and behavioral analytics, integrated with a vector database for context aware recommendations and a natural language bot for seamless task management.</p>
+                  </div>
+                </div><!-- End Portfolio Item -->
+
+                <!-- Empty placeholder — future project slot, shows only in All Projects -->
+                <div class="col-lg-8 col-md-6 portfolio-item isotope-item portfolio-placeholder" style="height: 180px;"></div>
+
+                <div class="col-lg-4 col-md-6 portfolio-item isotope-item filter-product ph-card-brand">
+                  <div class="portfolio-wrap">
+                    <a href="assets/img/portfolio/purehill-logo.png" class="glightbox" title="Pure Hill Organics — Brand Identity">
+                      <img src="assets/img/portfolio/purehill-logo.png" class="img-fluid" alt="Pure Hill Organics Logo" loading="lazy" style="object-fit: contain; object-position: center; background: #ffffff;">
+                    </a>
+                    <button class="info-btn" aria-label="More info"><i class="bi bi-info-lg"></i></button>
+                    <div class="info-popup">
+                      <p>Brand identity for Pure Hill Organics: a natural skincare brand launched by identifying unmet urban demand rooted in purity, trust, and sustainability.</p>
+                    </div>
+                    <div class="portfolio-info">
+                      <div class="content">
+                        <span class="category">Product Ventures</span>
+                        <h4>Pure Hill Organics</h4>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="ph-hover-popup ph-popup-right">
+                    <div class="ph-hover-popup-title">Pure Hill Organics</div>
+                    <p>Brand identity for Pure Hill Organics: a natural skincare brand launched by identifying unmet urban demand rooted in purity, trust, and sustainability.</p>
+                  </div>
+                </div><!-- End Portfolio Item -->
+
+                <div class="col-lg-4 col-md-6 portfolio-item isotope-item filter-product ph-card-brand ph-card-product-line">
+                  <div class="portfolio-wrap">
+                    <a href="assets/img/portfolio/purehill-products.png" class="glightbox" title="Product Line">
+                      <img src="assets/img/portfolio/purehill-products.png" class="img-fluid" alt="Pure Hill Organics Products" loading="lazy" style="object-fit: cover; object-position: center; background: #f0f0f0;">
+                    </a>
+                    <button class="info-btn" aria-label="More info"><i class="bi bi-info-lg"></i></button>
+                    <div class="info-popup">
+                      <p>Sized a gap in the chemical-dominated skincare market through consumer research and competitive analysis; built on authentic hill-sourced ingredients and FDA-approved formulations.</p>
+                    </div>
+                    <div class="portfolio-info">
+                      <div class="content">
+                        <span class="category"></span>
+                        <h4>Product Line</h4>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="ph-hover-popup ph-popup-down">
+                    <div class="ph-hover-popup-title">Product Line</div>
+                    <p>Sized a gap in the chemical-dominated skincare market through consumer research and competitive analysis; built on authentic hill-sourced ingredients and FDA-approved formulations.</p>
+                  </div>
+                </div><!-- End Portfolio Item -->
+
+                <div class="col-lg-4 col-md-6 portfolio-item isotope-item filter-product">
+                  <div class="portfolio-wrap">
+                    <a href="assets/img/portfolio/purehill-flatlay.png" class="glightbox" title="Pure Hill Organics — Ubtan Soap">
+                      <img src="assets/img/portfolio/purehill-flatlay.png" class="img-fluid" alt="Pure Hill Organics Flat Lay" loading="lazy" style="object-fit: cover; object-position: center;">
+                    </a>
+                    <button class="info-btn" aria-label="More info"><i class="bi bi-info-lg"></i></button>
+                    <div class="info-popup">
+                      <p>Identified via competitive analysis as an underserved SKU with cultural equity, offering a differentiated value proposition against chemical alternatives.</p>
+                    </div>
+                    <div class="portfolio-info">
+                      <div class="content">
+                        <span class="category ph-category-dark">Product</span>
+                        <h4 style="color: #E07820;">Ubtan Bar Handmade Soap</h4>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="ph-hover-popup ph-popup-left">
+                    <div class="ph-hover-popup-title">Ubtan Bar Handmade Soap</div>
+                    <p>Identified via competitive analysis as an underserved SKU with cultural equity, offering a differentiated value proposition against chemical alternatives.</p>
+                  </div>
+                </div><!-- End Portfolio Item -->
+
+                <div class="col-lg-4 col-md-6 portfolio-item isotope-item filter-product">
+                  <div class="portfolio-wrap">
+                    <a href="assets/img/portfolio/purehill-hairoil.png" class="glightbox" title="Pure Hill Organics — Red Onion Seed Hair Oil">
+                      <img src="assets/img/portfolio/purehill-hairoil.png" class="img-fluid" alt="Pure Hill Organics Red Onion Seed Hair Oil" loading="lazy" style="object-fit: cover; object-position: center;">
+                    </a>
+                    <button class="info-btn" aria-label="More info"><i class="bi bi-info-lg"></i></button>
+                    <div class="info-popup">
+                      <p>Validated by consumer surveys and UX research identifying hairfall as a top pain point; formulated for scalp strengthening and hairfall reduction.</p>
+                    </div>
+                    <div class="portfolio-info" style="padding: 0 25px 8px;">
+                      <div class="content">
+                        <span class="category ph-category-dark">Product</span>
+                        <h4 style="color: #6B3585;">Red Onion Seed Hair Oil</h4>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="ph-hover-popup ph-popup-right">
+                    <div class="ph-hover-popup-title">Red Onion Seed Hair Oil</div>
+                    <p>Validated by consumer surveys and UX research identifying hairfall as a top pain point; formulated for scalp strengthening and hairfall reduction.</p>
+                  </div>
+                </div><!-- End Portfolio Item -->
+
+                <div class="col-lg-4 col-md-6 portfolio-item isotope-item filter-product">
+                  <div class="portfolio-wrap">
+                    <a href="assets/img/portfolio/purehill-aloe.png" class="glightbox" title="Pure Hill Organics — Pure Aloe Vera Gel">
+                      <img src="assets/img/portfolio/purehill-aloe.png" class="img-fluid" alt="Pure Hill Organics Pure Aloe Vera Gel" loading="lazy" style="object-fit: cover; object-position: center;">
+                    </a>
+                    <button class="info-btn" aria-label="More info"><i class="bi bi-info-lg"></i></button>
+                    <div class="info-popup">
+                      <p>Positioned via product analytics as a high-frequency SKU to drive repeat purchases and brand retention through natural daily hydration.</p>
+                    </div>
+                    <div class="portfolio-info">
+                      <div class="content">
+                        <span class="category ph-category-dark">Product</span>
+                        <h4 style="color: #6DB840;">Aloe Vera Gel</h4>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="ph-hover-popup ph-popup-up">
+                    <div class="ph-hover-popup-title">Aloe Vera Gel</div>
+                    <p>Positioned via product analytics as a high-frequency SKU to drive repeat purchases and brand retention through natural daily hydration.</p>
+                  </div>
+                </div><!-- End Portfolio Item -->
+
+                <div class="col-lg-4 col-md-6 portfolio-item isotope-item filter-product">
+                  <div class="portfolio-wrap">
+                    <a href="assets/img/portfolio/purehill-charcoal.png" class="glightbox" title="Pure Hill Organics — Detox Charcoal Soap">
+                      <img src="assets/img/portfolio/purehill-charcoal.png" class="img-fluid" alt="Pure Hill Organics Detox Activated Charcoal Soap" loading="lazy" style="object-fit: cover; object-position: center 20%;">
+                    </a>
+                    <button class="info-btn" aria-label="More info"><i class="bi bi-info-lg"></i></button>
+                    <div class="info-popup">
+                      <p>Developed after GTM research uncovered consumer distrust in counterfeit charcoal soaps; formulated for deep cleansing and acne-free skin.</p>
+                    </div>
+                    <div class="portfolio-info">
+                      <div class="content">
+                        <span class="category ph-category-dark">Product</span>
+                        <h4 class="ph-title-detox">Detox Activated Handmade Charcoal Soap</h4>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="ph-hover-popup ph-popup-left">
+                    <div class="ph-hover-popup-title">Detox Activated Charcoal Soap</div>
+                    <p>Developed after GTM research uncovered consumer distrust in counterfeit charcoal soaps; formulated for deep cleansing and acne-free skin.</p>
+                  </div>
+                </div><!-- End Portfolio Item -->
+
+              </div><!-- End Portfolio Container -->
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section><!-- /Portfolio Section -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var purehillDesc = document.getElementById('purehill-desc');
+      var aiDesc = document.getElementById('ai-desc');
+
+      // Sync description panels for any filter element (desktop sidebar + mobile dropdown)
+      function applyDescriptions(filter) {
+        purehillDesc.style.display = (filter === '.filter-product') ? 'block' : 'none';
+        aiDesc.style.display = (filter === '.filter-ai') ? 'block' : 'none';
+      }
+
+      document.querySelectorAll('.portfolio-filters li').forEach(function (li) {
+        li.addEventListener('click', function () {
+          applyDescriptions(this.getAttribute('data-filter'));
+        });
+      });
+
+      // ── Mobile inline filter buttons (toggle / collapse) ──────────────
+      var mobBtns = document.querySelectorAll('.mob-filter-btn');
+
+      mobBtns.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var filter = this.getAttribute('data-filter');
+          var isActive = this.classList.contains('mob-active');
+
+          // Deactivate all buttons
+          mobBtns.forEach(function (b) { b.classList.remove('mob-active'); });
+
+          if (isActive) {
+            // Same button clicked again — collapse back to "All Projects"
+            var allLi = document.querySelector('.portfolio-filters li[data-filter="*"]');
+            if (allLi) allLi.click();
+            applyDescriptions('*');
+          } else {
+            // Activate this button and apply its filter
+            this.classList.add('mob-active');
+            var desktopLi = document.querySelector('.portfolio-filters li[data-filter="' + filter + '"]');
+            if (desktopLi) desktopLi.click();
+            applyDescriptions(filter);
+          }
+        });
+      });
+    });
+  </script>
+
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact section">
+
+      <!-- Section Title -->
+      <div class="container section-title" data-aos="fade-up">
+        <h2>Contact</h2>
+      </div><!-- End Section Title -->
+
+      <div class="container">
+
+        <div class="row g-4 g-lg-5">
+          <div class="col-lg-5">
+            <div class="info-box">
+              <h3>Contact Info</h3>
+              <p>Passionate about leveraging AI, analytics, and product strategy to build smart, efficient multi-agent AI systems that drive results. Let's connect and collaborate !</p>
+
+              <div class="info-item">
+                <div class="icon-box">
+                  <i class="bi bi-geo-alt"></i>
+                </div>
+                <div class="content">
+                  <h4>Location</h4>
+                  <p>Brooklyn, New York City,</p>
+                  <p>New York, NY, USA - 11220</p>
+                </div>
+              </div>
+
+              <div class="info-item">
+                <div class="icon-box">
+                  <i class="bi bi-telephone"></i>
+                </div>
+                <div class="content">
+                  <h4>Phone Number</h4>
+                  <p>+1 (929) 370-7587</p>
+                </div>
+              </div>
+
+              <div class="info-item">
+                <div class="icon-box">
+                  <i class="bi bi-envelope"></i>
+                </div>
+                <div class="content">
+                  <h4>Email Address</h4>
+                  <p>mayurvanne@outlook.com</p>
+                  <p>mayurvanne17@gmail.com</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-7">
+            <div class="contact-map-wrap">
+              <div class="map-label">
+                <i class="bi bi-geo-alt-fill"></i> I'm here
+              </div>
+              <div id="brooklyn-map"></div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section><!-- /Contact Section -->
+
+  </main>
+
+  <footer id="footer" class="footer position-relative">
+
+    <div class="container">
+      <div class="copyright text-center ">
+        <p>© <span>Copyright</span> <strong class="px-1 sitename">iPortfolio</strong> <span>All Rights Reserved</span></p>
+      </div>
+      <div class="credits">
+        Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a> | <a href="https://bootstrapmade.com/tools/">DevTools</a>
+      </div>
+    </div>
+
+  </footer>
+
+  <div class="modal-overlay" id="aiGameModal">
+      <div class="modal-game-content">
+          <div style="position: absolute; top: 15px; right: 20px; cursor: pointer; color: #94a3b8; font-size: 1.5rem;" onclick="closeGameModal()">×</div>
+          
+          <h4 style="color: white; margin-bottom: 1rem;">Rock Paper Scissors with AI</h4>
+          
+          <div class="difficulty-container">
+              <button class="diff-btn active" id="diff-normal" onclick="setDiff('normal')">NORMAL AI</button>
+              <button class="diff-btn" id="diff-hard" onclick="setDiff('hard')">GOD MODE</button>
+          </div>
+
+          <div class="stat-grid">
+              <div class="stat-card"><span class="stat-label">Rounds</span><span class="stat-val" id="r-count">0</span></div>
+              <div class="stat-card"><span class="stat-label">User</span><span class="stat-val" id="s-user">0</span></div>
+              <div class="stat-card"><span class="stat-label">AI</span><span class="stat-val" id="s-ai">0</span></div>
+          </div>
+
+          <div class="ai-log" id="ai-log">Ready to learn your patterns...</div>
+          <div id="result-banner">Start the Session!</div>
+
+          <div class="choices">
+              <button class="choice-btn" onclick="playGame('rock')" id="btn-rock" disabled>🪨</button>
+              <button class="choice-btn" onclick="playGame('paper')" id="btn-paper" disabled>📄</button>
+              <button class="choice-btn" onclick="playGame('scissors')" id="btn-scissors" disabled>✂️</button>
+          </div>
+
+          <div class="footer-btns">
+              <button class="btn-small btn-start" id="game-start-btn" onclick="startGameSession()">START SESSION</button>
+              <button class="btn-small btn-reset" onclick="resetGameSession()">WIPE MEMORY</button>
+          </div>
+      </div>
+  </div>
+  <!-- Scroll Top -->
+  <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+  <!-- Preloader -->
+  <div id="preloader"></div>
+
+  <!-- Vendor JS Files -->
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/vendor/php-email-form/validate.js"></script>
+  <script src="assets/vendor/aos/aos.js"></script>
+  <script src="assets/vendor/typed.js/typed.umd.js"></script>
+  <script src="assets/vendor/purecounter/purecounter_vanilla.js"></script>
+  <script src="assets/vendor/waypoints/noframework.waypoints.js"></script>
+  <script src="assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
+  <script src="assets/vendor/imagesloaded/imagesloaded.pkgd.min.js"></script>
+  <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
+  <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
+
+  <!-- Main JS File -->
+  <script src="assets/js/main.js"></script>
+
+  <script>
+  // NEURAL RPS LOGIC
+  const Brain = {
+      history: [],
+      difficulty: 'normal',
+      patterns: {},
+      freq: { rock: 0, paper: 0, scissors: 0 },
+
+      record(move) {
+          this.freq[move]++;
+          const h = this.history;
+          if (h.length >= 1) this.updatePattern(h[h.length - 1], move);
+          if (h.length >= 2) this.updatePattern(h[h.length - 2] + '-' + h[h.length - 1], move);
+          this.history.push(move);
+      },
+
+      updatePattern(key, nextMove) {
+          if (!this.patterns[key]) this.patterns[key] = { rock: 0, paper: 0, scissors: 0 };
+          this.patterns[key][nextMove]++;
+      },
+
+      predict() {
+          const h = this.history;
+          const len = h.length;
+          if (len < 3) return ['rock', 'paper', 'scissors'][Math.floor(Math.random() * 3)];
+
+          let prediction = 'rock';
+          let foundPattern = false;
+
+          if (this.difficulty === 'hard' && len >= 2) {
+              const key2 = h[len - 2] + '-' + h[len - 1];
+              if (this.patterns[key2]) {
+                  prediction = Object.keys(this.patterns[key2]).reduce((a, b) => this.patterns[key2][a] > this.patterns[key2][b] ? a : b);
+                  foundPattern = true;
+              }
+          }
+
+          if (!foundPattern) {
+              const key1 = h[len - 1];
+              if (this.patterns[key1]) {
+                  prediction = Object.keys(this.patterns[key1]).reduce((a, b) => this.patterns[key1][a] > this.patterns[key1][b] ? a : b);
+              } else {
+                  prediction = Object.keys(this.freq).reduce((a, b) => this.freq[a] > this.freq[b] ? a : b);
+              }
+          }
+
+          return { rock: 'paper', paper: 'scissors', scissors: 'rock' }[prediction];
+      },
+      
+      reset() { this.history = []; this.patterns = {}; this.freq = { rock: 0, paper: 0, scissors: 0 }; }
+  };
+
+  let gameScores = { user: 0, ai: 0, rounds: 0 };
+
+  window.openGameModal = function() { document.getElementById('aiGameModal').classList.add('active'); };
+  window.closeGameModal = function() { document.getElementById('aiGameModal').classList.remove('active'); };
+
+  window.setDiff = function(d) {
+      Brain.difficulty = d;
+      document.getElementById('diff-normal').classList.toggle('active', d === 'normal');
+      document.getElementById('diff-hard').classList.toggle('active', d === 'hard');
+      document.getElementById('ai-log').innerText = `Switched to ${d.toUpperCase()} logic...`;
+  };
+
+  window.startGameSession = function() {
+      document.getElementById('btn-rock').disabled = false;
+      document.getElementById('btn-paper').disabled = false;
+      document.getElementById('btn-scissors').disabled = false;
+      document.getElementById('game-start-btn').style.display = 'none';
+      document.getElementById('ai-log').innerText = "Neural network online. Play.";
+  };
+
+  window.playGame = function(userMove) {
+      const aiMove = Brain.predict();
+      Brain.record(userMove);
+      gameScores.rounds++;
+
+      let res = "";
+      if (userMove === aiMove) res = "DRAW";
+      else if ((userMove === 'rock' && aiMove === 'scissors') || 
+               (userMove === 'paper' && aiMove === 'rock') || 
+               (userMove === 'scissors' && aiMove === 'paper')) {
+          res = "WINNER"; gameScores.user++;
+      } else {
+          res = "DEFEAT"; gameScores.ai++;
+      }
+
+      const icons = { rock: '🪨', paper: '📄', scissors: '✂️' };
+      document.getElementById('result-banner').innerHTML = `${icons[userMove]} vs ${icons[aiMove]} — <span style="color: ${res==='WINNER'?'#10b981':'#ec4899'}">${res}</span>`;
+      document.getElementById('s-user').innerText = gameScores.user;
+      document.getElementById('s-ai').innerText = gameScores.ai;
+      document.getElementById('r-count').innerText = gameScores.rounds;
+      
+      const logs = ["Mapping user neuro-patterns...", "Calculating transition weights...", "Exploiting sequence bias...", "Adjusting predictive weights..."];
+      document.getElementById('ai-log').innerText = logs[Math.floor(Math.random()*logs.length)];
+  };
+
+  window.resetGameSession = function() {
+      Brain.reset();
+      gameScores = { user: 0, ai: 0, rounds: 0 };
+      document.getElementById('s-user').innerText = '0';
+      document.getElementById('s-ai').innerText = '0';
+      document.getElementById('r-count').innerText = '0';
+      document.getElementById('result-banner').innerText = "Brain Wiped.";
+      document.getElementById('game-start-btn').style.display = 'block';
+      document.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
+  };
+
+  // ORIGINAL SNOW EFFECT
+  (function() {
+    const snowCanvas = document.getElementById('snowCanvas');
+    const snowCtx = snowCanvas.getContext('2d');
+    let snowEnabled = false;
+    let snowflakes = [];
+
+    function resizeSnowCanvas() {
+      snowCanvas.width = window.innerWidth;
+      snowCanvas.height = window.innerHeight;
+    }
+    resizeSnowCanvas();
+
+    class Snowflake {
+      constructor() {
+        this.x = Math.random() * snowCanvas.width;
+        this.y = Math.random() * snowCanvas.height;
+        this.radius = Math.random() * 3 + 1;
+        this.speedY = Math.random() * 1 + 0.5;
+        this.speedX = Math.random() * 0.5 - 0.25;
+        this.opacity = Math.random() * 0.6 + 0.4;
+      }
+      update() {
+        this.y += this.speedY;
+        this.x += this.speedX;
+        if (this.y > snowCanvas.height) { this.y = 0; this.x = Math.random() * snowCanvas.width; }
+      }
+      draw() {
+        snowCtx.beginPath();
+        snowCtx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        snowCtx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+        snowCtx.fill();
+      }
+    }
+
+    function animateSnow() {
+      snowCtx.clearRect(0, 0, snowCanvas.width, snowCanvas.height);
+      if (snowEnabled) {
+        if (snowflakes.length === 0) { for (let i = 0; i < 100; i++) snowflakes.push(new Snowflake()); }
+        snowflakes.forEach(flake => { flake.update(); flake.draw(); });
+      }
+      requestAnimationFrame(animateSnow);
+    }
+
+    window.toggleSnow = function() { snowEnabled = !snowEnabled; };
+    window.addEventListener('resize', resizeSnowCanvas);
+    animateSnow();
+  })();
+  </script>
+
+<script>
+// RAIN EFFECT (Cursor Direction + Lightning)
+(function() {
+
+  const rainCanvas = document.getElementById("rainCanvas");
+  const ctx = rainCanvas.getContext("2d");
+  const lightningFlash = document.getElementById("lightningFlash");
+  const lightningBtn = document.getElementById("lightningBtn");
+
+  let rainEnabled = false;
+  let raindrops = [];
+  let wind = 0;
+  let mouseX = window.innerWidth / 2;
+
+  function resizeCanvas() {
+    rainCanvas.width = window.innerWidth;
+    rainCanvas.height = window.innerHeight;
+  }
+  resizeCanvas();
+  window.addEventListener("resize", resizeCanvas);
+
+  window.addEventListener("mousemove", (e) => {
+    mouseX = e.clientX;
+    let center = window.innerWidth / 2;
+    wind = (mouseX - center) / 100; // controls tilt
+  });
+
+  class Raindrop {
+    constructor() {
+      this.reset();
+    }
+
+    reset() {
+      this.x = Math.random() * rainCanvas.width;
+      this.y = Math.random() * -rainCanvas.height;
+      this.length = Math.random() * 20 + 10;
+      this.speed = Math.random() * 4 + 6;
+      this.opacity = Math.random() * 0.5 + 0.3;
+    }
+
+    update() {
+      this.y += this.speed;
+      this.x += wind;
+
+      if (this.y > rainCanvas.height) {
+        this.reset();
+        this.y = -20;
+      }
+    }
+
+    draw() {
+      ctx.beginPath();
+      ctx.moveTo(this.x, this.y);
+      ctx.lineTo(this.x + wind * 2, this.y + this.length);
+      ctx.strokeStyle = `rgba(174,194,224,${this.opacity})`;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+  }
+
+  function animateRain() {
+    ctx.clearRect(0, 0, rainCanvas.width, rainCanvas.height);
+
+    if (rainEnabled) {
+      raindrops.forEach(drop => {
+        drop.update();
+        drop.draw();
+      });
+    }
+
+    requestAnimationFrame(animateRain);
+  }
+
+  animateRain();
+
+  // GLOBAL toggleRain (used by your navbar button)
+  window.toggleRain = function() {
+    rainEnabled = !rainEnabled;
+
+    if (rainEnabled) {
+      if (raindrops.length === 0) {
+        for (let i = 0; i < 400; i++) {
+          raindrops.push(new Raindrop());
+        }
+      }
+      lightningBtn.style.display = "flex";
+    } else {
+      lightningBtn.style.display = "none";
+    }
+  };
+
+  // LIGHTNING EFFECT
+window.triggerLightning = function() {
+  let flashes = Math.floor(Math.random() * 2) + 2; // 2–3 flashes
+  let delay = 0;
+
+  for (let i = 0; i < flashes; i++) {
+    setTimeout(() => {
+      lightningFlash.style.transition = "none";
+      lightningFlash.style.opacity = "1"; // brighter
+
+      setTimeout(() => {
+        lightningFlash.style.transition = "opacity 0.2s ease-out"; // faster fade
+        lightningFlash.style.opacity = "0";
+      }, 70); // shorter flash duration
+
+    }, delay);
+
+    delay += Math.random() * 100 + 50; // shorter random gap between flashes
+  }
+};
+
+
+
+})();
+</script>
+
+<script>
+  // Resume dropdown — hover to preview, click to lock open — supports multiple instances
+  (function () {
+    const dropdowns = document.querySelectorAll('.resume-dropdown');
+
+    dropdowns.forEach(function (dropdown) {
+      const toggle = dropdown.querySelector('.resume-dropdown-toggle');
+      const menu = dropdown.querySelector('.resume-dropdown-menu');
+
+      if (!toggle || !menu) return;
+
+      // Click the button: toggle locked state
+      toggle.addEventListener('click', function (e) {
+        e.stopPropagation();
+        const isLocked = dropdown.classList.contains('locked');
+        // Close all other locked dropdowns first
+        dropdowns.forEach(function (d) { d.classList.remove('locked'); });
+        if (!isLocked) dropdown.classList.add('locked');
+      });
+
+      // Clicking a resume link: release lock
+      menu.querySelectorAll('.resume-dropdown-item').forEach(function (item) {
+        item.addEventListener('click', function () {
+          dropdown.classList.remove('locked');
+        });
+      });
+    });
+
+    // Clicking anywhere else: close all locked dropdowns
+    document.addEventListener('click', function (e) {
+      dropdowns.forEach(function (dropdown) {
+        if (!dropdown.contains(e.target)) {
+          dropdown.classList.remove('locked');
+        }
+      });
+    });
+  })();
+
+  // Pure Hill hover popups — keep-alive when cursor travels from image to popup
+  (function () {
+    var items = document.querySelectorAll('.portfolio-item.filter-product');
+    items.forEach(function (item) {
+      var wrap  = item.querySelector('.portfolio-wrap');
+      var popup = item.querySelector('.ph-hover-popup');
+      if (!wrap || !popup) return;
+
+      var hideTimer = null;
+
+      function show() {
+        clearTimeout(hideTimer);
+        item.classList.add('ph-active');
+      }
+
+      function scheduleHide() {
+        clearTimeout(hideTimer);
+        // 160 ms grace period to cross the gap between card edge and popup
+        hideTimer = setTimeout(function () {
+          item.classList.remove('ph-active');
+        }, 160);
+      }
+
+      function hideNow() {
+        clearTimeout(hideTimer);
+        item.classList.remove('ph-active');
+      }
+
+      wrap.addEventListener('mouseenter', show);
+      wrap.addEventListener('mouseleave', scheduleHide);
+
+      // Cursor arrived at popup from the image — cancel the hide
+      popup.addEventListener('mouseenter', function () {
+        clearTimeout(hideTimer);
+      });
+
+      // Cursor left the popup — hide immediately
+      popup.addEventListener('mouseleave', hideNow);
+    });
+  })();
+
+  // Info buttons on portfolio cards
+  (function () {
+    const infoBtns = document.querySelectorAll('.portfolio-wrap .info-btn');
+
+    infoBtns.forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        const popup = btn.nextElementSibling;
+        const isActive = popup.classList.contains('active');
+
+        // Close all other popups first
+        document.querySelectorAll('.info-popup.active').forEach(function (p) {
+          p.classList.remove('active');
+        });
+
+        if (!isActive) popup.classList.add('active');
+      });
+    });
+
+    // Taps inside the summary should not bubble to document (would close popup)
+    document.querySelectorAll('.portfolio-wrap .info-popup').forEach(function (popup) {
+      popup.addEventListener('click', function (e) {
+        e.stopPropagation();
+      });
+    });
+
+    // Close on outside click
+    document.addEventListener('click', function () {
+      document.querySelectorAll('.info-popup.active').forEach(function (p) {
+        p.classList.remove('active');
+      });
+    });
+  })();
+</script>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  (function () {
+    var brooklynLat = 40.6501, brooklynLng = -73.9496;
+    // NYC overview centre
+    var nycLat = 40.7128, nycLng = -73.9760;
+    var isZoomedIn = false;
+    var roamTimer = null;
+    var rafId = null;
+
+    var map = L.map('brooklyn-map', {
+      center: [nycLat, nycLng],
+      zoom: 10,                   // zoomed-out NYC overview on load
+      zoomControl: false,
+      scrollWheelZoom: false,     // disabled; pinch-only handled below
+      touchZoom: true,            // native pinch-to-zoom on touch screens
+      attributionControl: false
+    });
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      maxZoom: 19
+    }).addTo(map);
+
+    var pulseIcon = L.divIcon({
+      className: '',
+      html: '<div class="map-hover-marker"><div class="map-hover-orb"></div><div class="map-hover-shadow"></div></div>',
+      iconSize: [56, 56],
+      iconAnchor: [28, 42]
+    });
+
+    // Ball starts resting over NYC centre on load
+    var marker = L.marker([nycLat, nycLng], { icon: pulseIcon }).addTo(map);
+
+    // ── Waypoints used once zoomed into Brooklyn ──────────────────────────
+    var brooklynWaypoints = [
+      [40.6782, -73.9442],  // Central Brooklyn
+      [40.6968, -73.9905],  // Downtown Brooklyn
+      [40.7063, -74.0086],  // Brooklyn Bridge
+      [40.7282, -73.9442],  // Williamsburg
+      [40.6501, -74.0064],  // Bay Ridge
+      [40.6437, -73.8671],  // Flatbush
+      [40.6650, -73.9800],  // Prospect Park
+      [40.6892, -73.9840],  // Boerum Hill
+      [40.6501, -73.9496],  // South Brooklyn
+    ];
+    var currentWP = 0;
+
+    function ease(t) {
+      return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+    }
+
+    function animateTo(toLat, toLng, duration, onDone) {
+      if (rafId) cancelAnimationFrame(rafId);
+      var from = marker.getLatLng();
+      var startLat = from.lat, startLng = from.lng;
+      var startTime = null;
+      function step(ts) {
+        if (!startTime) startTime = ts;
+        var p = Math.min((ts - startTime) / duration, 1);
+        var e = ease(p);
+        marker.setLatLng([startLat + (toLat - startLat) * e,
+                          startLng + (toLng - startLng) * e]);
+        if (p < 1) { rafId = requestAnimationFrame(step); }
+        else if (onDone) { onDone(); }
+      }
+      rafId = requestAnimationFrame(step);
+    }
+
+    function roamBrooklyn() {
+      currentWP = (currentWP + 1) % brooklynWaypoints.length;
+      var wp = brooklynWaypoints[currentWP];
+      var travelMs = 2400 + Math.random() * 900;
+      animateTo(wp[0], wp[1], travelMs, function () {
+        roamTimer = setTimeout(roamBrooklyn, 1400 + Math.random() * 1400);
+      });
+    }
+
+    // ── Click: first click zooms to Brooklyn and starts roaming ──────────
+    map.on('click', function () {
+      if (!isZoomedIn) {
+        isZoomedIn = true;
+        map.flyTo([brooklynLat, brooklynLng], 13, { duration: 1.8 });
+        // Move ball to Brooklyn centre as map flies in, then start roaming
+        animateTo(brooklynLat, brooklynLng, 1800, function () {
+          roamTimer = setTimeout(roamBrooklyn, 800);
+        });
+      } else {
+        // Second click resets to NYC overview
+        isZoomedIn = false;
+        if (roamTimer) clearTimeout(roamTimer);
+        if (rafId) cancelAnimationFrame(rafId);
+        map.flyTo([nycLat, nycLng], 10, { duration: 1.6 });
+        animateTo(nycLat, nycLng, 1600, null);
+      }
+    });
+
+    var zoomCtrl = L.control.zoom({ position: 'topright' }).addTo(map);
+    // Stop zoom button clicks from reaching the map's own click handler
+    L.DomEvent.disableClickPropagation(zoomCtrl.getContainer());
+
+    // Pinch-only zoom: ctrlKey=true means pinch gesture on laptop trackpad or
+    // actual pinch on a touchscreen via the Pointer Events API.
+    // Two-finger scroll (ctrlKey=false) is intentionally ignored so the page
+    // keeps scrolling normally.
+    map.getContainer().addEventListener('wheel', function (e) {
+      if (e.ctrlKey) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.deltaY < 0) {
+          map.zoomIn(1);
+        } else {
+          map.zoomOut(1);
+        }
+      }
+      // no ctrlKey → let the browser handle it (page scroll)
+    }, { passive: false });
+
+    L.control.attribution({ position: 'bottomleft', prefix: false })
+      .addAttribution('© <a href="https://carto.com/">CARTO</a>')
+      .addTo(map);
+  })();
+</script>
+
+</body>
+
+</html>
